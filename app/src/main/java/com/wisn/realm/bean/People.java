@@ -3,6 +3,7 @@ package com.wisn.realm.bean;
 import java.util.Date;
 
 import io.realm.RealmModel;
+import io.realm.RealmObject;
 import io.realm.annotations.Ignore;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.RealmClass;
@@ -10,9 +11,10 @@ import io.realm.annotations.Required;
 
 /**
  * Created by wisn on 2017/11/9.
+ * 实现接口不能使用realm对应的方法，如：删除
  */
 @RealmClass
-public class People implements RealmModel {
+public class People extends RealmObject {
     @PrimaryKey
     private int id;
     private byte bytetest;
@@ -110,7 +112,8 @@ public class People implements RealmModel {
     @Override
     public String toString() {
         return "People{" +
-               "bytetest=" + bytetest +
+               "id=" + id +
+               ", bytetest=" + bytetest +
                ", shorttest=" + shorttest +
                ", inttest=" + inttest +
                ", longtest=" + longtest +
@@ -118,6 +121,7 @@ public class People implements RealmModel {
                ", doubletest=" + doubletest +
                ", Stringtest='" + Stringtest + '\'' +
                ", datetest=" + datetest +
+               ", datetest2=" + datetest2 +
                '}';
     }
 }
