@@ -9,6 +9,8 @@ import android.widget.CheckBox;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.wisn.realm.bean.Company;
+import com.wisn.realm.bean.Employee;
 import com.wisn.realm.bean.People;
 
 import java.util.Iterator;
@@ -64,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (v == mDelete) {
             final RealmResults<People> all = mRealm.where(People.class)
                                                    .findAll();
-            updateView("result:"+all,false);
+            updateView("delete before result:"+all,false);
             if(all==null||all.size()==0){
                 return;
             }
@@ -81,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     all.deleteAllFromRealm();
                 }
             });
+            final RealmResults<People> all1 = mRealm.where(People.class)
+                                                   .findAll();
+            updateView("delete after result:"+all1,false);
         } else if (v == mUpdate) {
             mRealm.executeTransaction(new Realm.Transaction(){
                 @Override
@@ -115,63 +120,78 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mRealm.executeTransactionAsync(new Realm.Transaction(){
                 @Override
                 public void execute(Realm realm) {
+                    Company company1=realm.createObject(Company.class);
+                    company1.setCompanyid(1);
+                    company1.setCompany_Name("company"+1);
+                    Company company2=realm.createObject(Company.class);
+                    company2.setCompanyid(2);
+                    company2.setCompany_Name("company"+2);
                     for(int i=0;i<1000;i++){
-                        People people=realm.createObject(People.class,i);
-                        people.setStringtest("wisn"+i);
+                        Employee employee=realm.createObject(Employee.class,i);
+                        employee.setEmployee_Name("employeeName"+i);
+                        if(i%2==1){
+                            employee.setCompany(company1);
+                        }else{
+                            employee.setCompany(company2);
+                        }
                     }
                 }
             }, new Realm.Transaction.OnSuccess(){
 
                 @Override
                 public void onSuccess() {
-                    updateView(" insert onSuccess",false);
+                    updateView(" insert onSuccess",true);
                 }
             }, new Realm.Transaction.OnError(){
+
                 @Override
                 public void onError(Throwable error) {
-                    updateView(" insert onError",false);
+                    updateView(" insert onError "+error.getMessage(),true);
                 }
             });
         } else if (v == mDelete) {
-            final RealmResults<People> all = mRealm.where(People.class)
+            final RealmResults<Employee> allEmployee = mRealm.where(Employee.class)
                                                    .findAll();
-            updateView("result:"+all,false);
-            if(all==null||all.size()==0){
-                return;
-            }
-            mRealm.executeTransactionAsync(new Realm.Transaction(){
+            final RealmResults<Company> allCompany = mRealm.where(Company.class)
+                                                             .findAll();
+            updateView("delete before result:"+allEmployee,false);
+
+
+         /*   allEmployee.deleteFirstFromRealm();//删除第一个
+            allEmployee.deleteLastFromRealm();
+            allEmployee.deleteFromRealm(100);
+            Employee employee = allEmployee.get(3);
+            updateView(employee.toString(),false);
+            employee.deleteFromRealm();*/
+
+             mRealm.executeTransaction(new Realm.Transaction(){
                 @Override
                 public void execute(Realm realm) {
-                    all.deleteFirstFromRealm();//删除第一个
-                    all.deleteLastFromRealm();
-                    all.deleteFromRealm(100);
+                    if(allEmployee==null||allEmployee.size()==0){
+                        return;
+                    }
+                    allEmployee.deleteAllFromRealm();
+                    if(allCompany==null||allCompany.size()==0){
+                        return;
+                    }
+                    allCompany.deleteAllFromRealm();
                     // remove a single object
-                    People people = all.get(3);
-                    updateView(people.toString(),false);
-                    people.deleteFromRealm();
-                    all.deleteAllFromRealm();
-                }
-            }, new Realm.Transaction.OnSuccess(){
-                @Override
-                public void onSuccess() {
-                    updateView(" mDelete onSuccess",false);
-                }
-            }, new Realm.Transaction.OnError(){
-                @Override
-                public void onError(Throwable error) {
-                    updateView(" mDelete onError",false);
+
                 }
             });
+            final RealmResults<People> all1 = mRealm.where(People.class)
+                                                    .findAll();
+            updateView("delete after result:"+all1,true);
         } else if (v == mUpdate) {
             mRealm.executeTransactionAsync(new Realm.Transaction(){
                 @Override
                 public void execute(Realm realm) {
                     long start=System.nanoTime();
                     for(int i=0;i<1000;i++){
-                        People people=new People();
-                        people.setId(i);
-                        people.setStringtest("wisn"+i+"update");
-                        realm.copyToRealmOrUpdate(people);
+                        Employee employee=new Employee();
+                        employee.setEmployeeId(i);
+                        employee.setEmployee_Name("update "+i);
+                        realm.copyToRealmOrUpdate(employee);
                     }
                     long count=System.nanoTime()-start;
                     updateView("mUpdate 用时纳秒："+count,false);
@@ -180,23 +200,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 @Override
                 public void onSuccess() {
-                    updateView(" mUpdate onSuccess",false);
+                    updateView(" mUpdate onSuccess",true);
                 }
             }, new Realm.Transaction.OnError(){
 
                 @Override
                 public void onError(Throwable error) {
-                    updateView(" mUpdate onError",false);
+                    updateView(" mUpdate onError "+error.getMessage(),true);
                 }
             });
         } else if (v == mQuery) {
             long start=System.nanoTime();
-            RealmResults<People> all = mRealm.where(People.class)
+            RealmResults<Employee> all = mRealm.where(Employee.class)
                                              .findAll();
             long count=System.nanoTime()-start;
-            Iterator<People> iterator = all.iterator();
+            Iterator<Employee> iterator = all.iterator();
             while(iterator.hasNext()){
-                People next = iterator.next();
+                Employee next = iterator.next();
                 updateView(next.toString(),true);
             }
             updateView("用时纳秒："+count,true);
