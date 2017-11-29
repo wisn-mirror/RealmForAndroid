@@ -12,7 +12,7 @@ public class Employee extends RealmObject {
     private int EmployeeId;
     private String employee_Name;
     //一对多
-    private Company company;
+    public Company company;
 
     public int getEmployeeId() {
         return EmployeeId;

@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.wisn.realm.bean.Company;
 import com.wisn.realm.bean.Employee;
 import com.wisn.realm.bean.People;
+import com.wisn.realm.bean.ShareTheBike;
 
 import java.util.Iterator;
 
@@ -126,13 +127,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Company company2=realm.createObject(Company.class);
                     company2.setCompanyid(2);
                     company2.setCompany_Name("company"+2);
-                    for(int i=0;i<1000;i++){
+                    ShareTheBike bike1=realm.createObject(ShareTheBike.class);
+                    bike1.setBick_id(1);
+                    bike1.setBick_Name("bike"+1);
+                    ShareTheBike bike2=realm.createObject(ShareTheBike.class);
+                    bike2.setBick_id(2);
+                    bike2.setBick_Name("bike"+2);
+                    ShareTheBike bike3=realm.createObject(ShareTheBike.class);
+                    bike3.setBick_id(3);
+                    bike3.setBick_Name("bike"+3);
+
+                    for(int i=0;i<100;i++){
                         Employee employee=realm.createObject(Employee.class,i);
                         employee.setEmployee_Name("employeeName"+i);
                         if(i%2==1){
                             employee.setCompany(company1);
+                            bike1.employees.add(employee);
+                            bike2.employees.add(employee);
                         }else{
                             employee.setCompany(company2);
+                            bike3.employees.add(employee);
                         }
                     }
                 }
@@ -154,6 +168,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                                    .findAll();
             final RealmResults<Company> allCompany = mRealm.where(Company.class)
                                                              .findAll();
+            final RealmResults<ShareTheBike> shareTheBike = mRealm.where(ShareTheBike.class)
+                                                           .findAll();
             updateView("delete before result:"+allEmployee,false);
 
 
@@ -167,16 +183,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
              mRealm.executeTransaction(new Realm.Transaction(){
                 @Override
                 public void execute(Realm realm) {
-                    if(allEmployee==null||allEmployee.size()==0){
-                        return;
+                    if(allEmployee!=null||allEmployee.size()!=0){
+                        allEmployee.deleteAllFromRealm();
                     }
-                    allEmployee.deleteAllFromRealm();
-                    if(allCompany==null||allCompany.size()==0){
-                        return;
+                    if(allCompany!=null||allCompany.size()!=0){
+                        allCompany.deleteAllFromRealm();
                     }
-                    allCompany.deleteAllFromRealm();
+                    if(shareTheBike!=null||shareTheBike.size()!=0){
+                        shareTheBike.deleteAllFromRealm();
+                    }
                     // remove a single object
-
                 }
             });
             final RealmResults<People> all1 = mRealm.where(People.class)
@@ -212,11 +228,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (v == mQuery) {
             long start=System.nanoTime();
             RealmResults<Employee> all = mRealm.where(Employee.class)
+                                               .equalTo("company.companyid",1)
                                              .findAll();
             long count=System.nanoTime()-start;
             Iterator<Employee> iterator = all.iterator();
             while(iterator.hasNext()){
                 Employee next = iterator.next();
+                updateView(next.toString(),true);
+            }
+            updateView("用时纳秒："+count,true);
+            updateView("bike ",true);
+            start=System.nanoTime();
+            RealmResults<ShareTheBike>
+                    all1 =
+                    mRealm.where(ShareTheBike.class).equalTo("employees.EmployeeId", 33)
+                          .findAll();
+            count=System.nanoTime()-start;
+            Iterator<ShareTheBike> iterator2 = all1.iterator();
+            while(iterator2.hasNext()){
+                ShareTheBike next = iterator2.next();
+                updateView(next.toString(),true);
+            }
+            updateView("用时纳秒："+count,true);
+            start=System.nanoTime();
+            ShareTheBike shareTheBike = mRealm.where(ShareTheBike.class).findAll()
+                                              .get(1);
+            count=System.nanoTime()-start;
+            Iterator<Employee> iterator3 = shareTheBike.employees.iterator();
+            while(iterator3.hasNext()){
+                Employee next = iterator3.next();
                 updateView(next.toString(),true);
             }
             updateView("用时纳秒："+count,true);

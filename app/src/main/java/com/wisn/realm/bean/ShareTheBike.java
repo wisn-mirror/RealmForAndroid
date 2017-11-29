@@ -10,7 +10,7 @@ import io.realm.RealmObject;
 public class ShareTheBike extends RealmObject{
     private int bick_id;
     private String bick_Name;
-    private RealmList<Employee>  employees;
+    public RealmList<Employee>  employees;
 
     public String getBick_Name() {
         return bick_Name;
